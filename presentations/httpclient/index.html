@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>HttpClient From Zero To HeisenBerg</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Naresh Patel">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-background-image="images/main.jpg">
+				<br/>
+				<br/>
+				
+				<br/>
+				
+				<br/>
+					<p><big>HttpClient</big><p>
+					
+					
+				<br/>
+				<br/>
+				<br/>
+				
+				<br/>
+					<p style="color:black;float:right;text-align:right;">
+						<big>From Zero To Heisenberg</big>
+					</p>
+				</section>
+				<section>
+					<h1>Why?</h1>
+				</section>
+				<section>
+					<h1>MicroServices</h1>
+				</section>
+				<section>
+					<p>
+						<ul>
+							<li>Refit</li>
+							<li>Flurl.Http</li>
+							<li>AutoRest</li>
+							<li>RestSharp*</li>
+						</ul>
+						
+					</p>
+				</section>
+				<section>
+					<h1>Ground Zero</h1>
+					<img data-src="images/Ground-zero.jpg">
+				</section>
+				<section>
+					<h1>SODD</h1>
+					<p>
+						<small class="fragment">StackOverflow Driven Development</small>
+					</p>
+					<img class="fragment" data-src="images/jesse.jpg">
+				</section>
+				<section>
+				<big>IDisposable</big>
+						<pre><code data-trim data-noescape class="csharp">
+						  var request = ...
+						  using(var client = new HttpClient())
+						  {
+							  var resp= await client.SendAsync(request);
+						  }	
+					
+						</code></pre>
+						
+						<small class="fragment"> Example on msdn page until August 2016 - <a href="https://web.archive.org/web/20160815181033/http://www.asp.net:80/web-api/overview/advanced/calling-a-web-api-from-a-net-client">web archive link</a></small>
+				</section>
+				<section>
+					
+					<p style="text-align:left;">
+						HttpClient is intended to be instantiated once and re-used throughout the life of an application. Especially in server applications, creating a new HttpClient instance for every request will exhaust the number of sockets available under heavy loads. This will result in SocketException errors.
+					</p>
+					<small> <a href="https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/calling-a-web-api-from-a-net-client">from recently updated documentation</a></small>
+				
+				</section>
+				<section>
+					<h1>Singleton</h1>
+				</section>
+				<section>
+					<h1>Thread Safe Methods</h1>
+				</section>
+				<section>
+					<big>SendAsync</big>
+				</section>
+				<section>
+					<big>BaseAddress</big>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+    static HttpClient client = new HttpClient();
+    static void Main(string[] args){
+      client.DefaultRequestHeaders.Clear();
+      client.DefaultRequestHeaders.Add("User-Agent", "HttpClient");
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("https://api.github.com/");
+      req.Method = HttpMethod.Get;
+      Task.Run(async () => {
+        HttpResponseMessage resp = await client.SendAsync(req);
+        var responseString = await resp.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+      }).GetAwaiter().GetResult();
+      client.Dispose();}
+						</code></pre>
+				</section>
+				<section>
+					<big>DefaultRequestHeaders</big>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+    static HttpClient client = new HttpClient();
+    static void Main(string[] args){
+      client.DefaultRequestHeaders.Clear();
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("https://api.github.com/");
+      req.Method = HttpMethod.Get;
+	  client.Headers.Add("User-Agent", "HttpClient");
+      Task.Run(async () => {
+        HttpResponseMessage resp = await client.SendAsync(req);
+        var responseString = await resp.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+      }).GetAwaiter().GetResult();
+      client.Dispose();}
+						</code></pre>
+				</section>
+				<section>
+					<big>Timeout</big>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+static HttpClient client = new HttpClient();
+static void Main(string[] args)
+{
+  client.DefaultRequestHeaders.Clear();
+  var req = new HttpRequestMessage();
+  req.RequestUri = new Uri("http://www.mocky.io/v2/59ddb33a100000b809a84dfd"");
+  var cs = new CancellationTokenSource();
+  cs.CancelAfter(TimeSpan.FromSeconds(1));
+  Task.Run(async () => { 
+  HttpResponseMessage resp = 
+  await client.SendAsync(req, cs.Token);
+	var responseString = await resp.Content.ReadAsStringAsync();
+	Console.WriteLine(responseString);
+  }).GetAwaiter().GetResult();
+  client.Dispose();}
+						</code></pre>
+				</section>
+				<section>
+					<big>Mocking</big>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+public interface IHttpClient
+{
+    Task&lt;HttpResponseMessage&gt; SendAsync
+	(HttpRequestMessage request, TimeSpan timeout);
+}
+					</code></pre>
+				</section>
+				<section>
+					<ul>
+						<li><a href="https://github.com/richardszalay/mockhttp"> MockHttp</a></li>
+						<li><a href="https://github.com/PureKrome/HttpClient.Helpers"> HttpClient.Helpers</a></li>
+					</ul>
+					
+					<p class="fragment">
+						<a href="https://github.com/dotnet/corefx/issues/1624">HttpHandler and HttpClient architecture discussion</a>
+					</p>
+				</section>
+				<section>
+					<p><big>HttpClient</big><p>
+					<ul>
+						<li><a href="https://github.com/dotnet/corefx/tree/master/src/System.Net.Http"> .net Core Framework Repo</a></li>
+						<li><a href="https://referencesource.microsoft.com/#System.Net.Http/System/Net/Http/HttpClient.cs"> .net Framework source</a></li>
+					</ul>
+				</section>
+				<section>
+					<h1>Security</h1>
+					<img data-src="images/security.jpg">
+				</section>
+				<section>
+					<h1>SSL Check</h1>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+class Program
+  {
+    static HttpClient client = new HttpClient();
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("https://www.howsmyssl.com/a/check");
+      req.Method = HttpMethod.Get;
+
+      Task.Run(async () =>
+      {
+        HttpResponseMessage resp = await client.SendAsync(req);
+        var responseString = await resp.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+      }).GetAwaiter().GetResult();
+      client.Dispose();
+    }
+					</code></pre>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="js">
+{"insecure_cipher_suites": {
+    "TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA": [
+      "uses 3DES which is vulnerable to the Sweet32 attack but was not configured as a fallback in the ciphersuite order"],
+    "TLS_RSA_WITH_3DES_EDE_CBC_SHA": [
+      "uses 3DES which is vulnerable to the Sweet32 attack but was not configured as a fallback in the ciphersuite order"],
+    "TLS_RSA_WITH_RC4_128_MD5": [
+      "uses RC4 which has insecure biases in its output"],
+    "TLS_RSA_WITH_RC4_128_SHA": [
+      "uses RC4 which has insecure biases in its output"]
+  },
+  "tls_version": "TLS 1.0",
+  "rating": "Bad"}
+					</code></pre>
+				</section>
+				<section>
+					<ul>
+						<li>TLS 1.0 is not considered secure anymore</li>
+						<li>Official date for compliance by PCI is June 30, 2018</li>
+						<li>https://help.salesforce.com/articleView?id=000221207&type=1</li>
+						<li>https://blog.pcisecuritystandards.org/migrating-from-ssl-and-early-tls</li>
+					</ul>
+				</section>
+				<section>
+					<ul>
+						<li>For framework 4.6 and above it is TLS 1.2</li>
+						<li>For framework 4.5 and below it is TLS 1.1</li>
+						<li>For framework 4.0 support TLS 1.0 (please upgrade to 4.5)</li>
+					</ul>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+						 ServicePointManager.SecurityProtocol 
+						 = SecurityProtocolType.Tls11;
+					</code></pre>
+				</section>
+				<section>
+					<h2>Public Key Pinning</h2>
+				</section>
+				<section>
+					<p><a href="https://www.owasp.org/index.php/Certificate_and_Public_Key_Pinning#.Net">OWASP Guideline</a></p>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+// Encoded RSAPublicKey
+private static String PUB_KEY = "308189...";
+public static void Main(string[] args)
+{
+  ServicePointManager.ServerCertificateValidationCallback
+  = PinPublicKey;
+  static HttpClient client = new HttpClient();
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("https://encrypted.google.com/");
+}
+
+					</code></pre>
+				</section>
+<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+public static bool PinPublicKey
+(object sender, X509Certificate certificate, X509Chain chain,
+ SslPolicyErrors sslPolicyErrors)
+{
+	// user sender.Host to make this work for any host
+  if (null == certificate)
+    return false;
+  String pk = certificate.GetPublicKeyString();
+  if (pk.Equals(PUB_KEY))
+   { return true;}
+  // MITM
+  return false;
+}
+</code></pre>
+				</section>
+				<section>
+					<h2>UrlScheme</h2>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+class Program
+  {
+    static HttpClient client = new HttpClient();
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("file:///C:/Windows/win.ini");
+      req.Method = HttpMethod.Get;
+
+      Task.Run(async () =>
+      {
+        HttpResponseMessage resp = await client.SendAsync(req);
+        var responseString = await resp.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+      }).GetAwaiter().GetResult();
+      client.Dispose();
+    }
+					</code></pre>
+				</section>
+				<section>
+					<p>Check that url is https only on QA and Production envrionments</p>
+				</section>
+				<section>
+					<img data-src="images/hberg.jpg">
+				</section>
+				<section>
+					<h1>One more thing</h1>
+				</section>
+				<section data-background-image="images/tucco.gif">
+					
+				</section>
+				<section>
+					<big>Protocol Violation Errors</big>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+    static HttpClient client = new HttpClient();
+    static void Main(string[] args){
+      client.DefaultRequestHeaders.Clear();
+      //client.DefaultRequestHeaders.Add("User-Agent", "HttpClient");
+      var req = new HttpRequestMessage();
+      req.RequestUri = new Uri("https://api.github.com/");
+      req.Method = HttpMethod.Get;
+      Task.Run(async () => {
+        HttpResponseMessage resp = await client.SendAsync(req);
+        var responseString = await resp.Content.ReadAsStringAsync();
+        Console.WriteLine(responseString);
+      }).GetAwaiter().GetResult();
+      client.Dispose();}
+						</code></pre>
+				</section>
+				<section>
+				<pre>
+				<code class="line-numbers" data-trim data-noescape>
+HTTP/1.0 403 Forbidden
+Cache-Control: no-cache
+Connection: close
+Content-Type: text/html
+
+Request forbidden by administrative rules. 
+Please make sure your request has a User-Agent header 
+(http://developer.github.com/v3/#user-agent-required). 
+Check https://developer.github.com for other possible causes.
+
+				</code>
+				</pre>
+				</section>
+				<section>
+					<small>http://mehdi.me/a-tale-of-debugging-the-linkedin-api-net-and-http-protocol-violations/</small>
+				</section>
+				<section>
+					 <h3>Presentation Available Online</h3>
+					<small>https://nareshpatel.me/presentation/httpclient</small>
+				</section>
+				<section data-background-image="images/questions.gif">
+					<h1 style="color:black;">Questions</h1>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/audio-slideshow/audio-slideshow.js', condition: function( ) { return !!document.body.classList; } },
+					{src: 'plugin/line-numbers/line-numbers.js'}
+				]
+			});
+		</script>
+	</body>
+</html>
