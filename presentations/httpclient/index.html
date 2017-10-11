@@ -399,7 +399,8 @@ Check https://developer.github.com for other possible causes.
 				</pre>
 				</section>
 				<section>
-					<small><a href="http://mehdi.me/a-tale-of-debugging-the-linkedin-api-net-and-http-protocol-violations/">A tale of debugging the linkedin api .net and http protocol violations</a></small>
+					<small><a href="http://mehdi.me/a-tale-of-debugging-the-linkedin-api-net-and-http-protocol-violations/">A tale of debugging the linkedin api .net and http protocol violations
+					</a></small>
 				</section>
 				<section>
 					<p><big>HttpClient Source Code</big><p>
@@ -425,6 +426,7 @@ Check https://developer.github.com for other possible causes.
 			// More info about config & dependencies:
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
+			var gaPropertyID = 'UA-62864711-1';
 			Reveal.initialize({
 				progress:false,
 				slideNumber:true,
@@ -433,8 +435,8 @@ Check https://developer.github.com for other possible causes.
 					{ src: 'plugin/markdown/markdown.js' },
 					{ src: 'plugin/notes/notes.js', async: true },
 					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-					{ src: 'plugin/audio-slideshow/audio-slideshow.js', condition: function( ) { return !!document.body.classList; } },
-					{src: 'plugin/line-numbers/line-numbers.js'}
+					{src: 'plugin/line-numbers/line-numbers.js'},
+					{ src: 'plugin/reveal-ga/reveal-ga.js' }
 				]
 			});
 		</script>
