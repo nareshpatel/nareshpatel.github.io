@@ -77,10 +77,7 @@
 					<img data-src="images/Ground-zero.jpg">
 				</section>
 				<section>
-					<h1>SODD</h1>
-					<p>
-						<small class="fragment">StackOverflow Driven Development</small>
-					</p>
+					<h3>What would Jesse do?</h3>
 					<img class="fragment" data-src="images/jesse.jpg">
 				</section>
 				<section>
@@ -179,34 +176,25 @@ static void Main(string[] args)
 						</code></pre>
 				</section>
 				<section>
-					<big>Mocking</big>
-				</section>
-				<section>
-					<pre>
-					<code class="line-numbers" data-trim data-noescape class="csharp">
-public interface IHttpClient
-{
-    Task&lt;HttpResponseMessage&gt; SendAsync
-	(HttpRequestMessage request, TimeSpan timeout);
-}
-					</code></pre>
-				</section>
-				<section>
-					<ul>
-						<li><a href="https://github.com/richardszalay/mockhttp"> MockHttp</a></li>
-						<li><a href="https://github.com/PureKrome/HttpClient.Helpers"> HttpClient.Helpers</a></li>
-					</ul>
-					
-					<p class="fragment">
-						<a href="https://github.com/dotnet/corefx/issues/1624">HttpHandler and HttpClient architecture discussion</a>
+					<h3>DNS changes</h3>
+					<p>
+						<a href="http://byterot.blogpost.com/2016/07/singleton-httpclient-dns.html"> Blog Post</a>
 					</p>
+					<ul class="fragment">
+						<li>Failover</li>
+						<li>Blue Green Deployment</li>
+					</ul>
 				</section>
 				<section>
-					<p><big>HttpClient</big><p>
-					<ul>
-						<li><a href="https://github.com/dotnet/corefx/tree/master/src/System.Net.Http"> .net Core Framework Repo</a></li>
-						<li><a href="https://referencesource.microsoft.com/#System.Net.Http/System/Net/Http/HttpClient.cs"> .net Framework source</a></li>
-					</ul>
+					<big>ServicePointManager</big>
+					<pre>
+					<code>
+var apiEndpoint = new Uri("https://foo.bar/baz/123");
+var sp = ServicePointManager.FindServicePoint(apiEndpoint);
+sp.ConnectionLeaseTimeout = 
+(int)TimeSpan.FromMinutes(1).TotalMilliseconds
+					</code>
+					</pre>
 				</section>
 				<section>
 					<h1>Security</h1>
@@ -222,7 +210,8 @@ class Program
   {
     static HttpClient client = new HttpClient();
       var req = new HttpRequestMessage();
-      req.RequestUri = new Uri("https://www.howsmyssl.com/a/check");
+      req.RequestUri = 
+	  new Uri("https://www.howsmyssl.com/a/check");
       req.Method = HttpMethod.Get;
 
       Task.Run(async () =>
@@ -315,7 +304,7 @@ public static bool PinPublicKey
 </code></pre>
 				</section>
 				<section>
-					<h2>UrlScheme</h2>
+					<h2>Url Scheme</h2>
 				</section>
 				<section>
 					<pre>
@@ -339,6 +328,29 @@ class Program
 				</section>
 				<section>
 					<p>Check that url is https only on QA and Production envrionments</p>
+				</section>
+				<section>
+					<h2>Unit Testing</h2>
+				</section>
+				<section>
+					<pre>
+					<code class="line-numbers" data-trim data-noescape class="csharp">
+public interface IHttpClient
+{
+    Task&lt;HttpResponseMessage&gt; SendAsync
+	(HttpRequestMessage request, TimeSpan timeout);
+}
+					</code></pre>
+				</section>
+				<section>
+					<ul>
+						<li><a href="https://github.com/richardszalay/mockhttp"> MockHttp</a></li>
+						<li><a href="https://github.com/PureKrome/HttpClient.Helpers"> HttpClient.Helpers</a></li>
+					</ul>
+					
+					<p class="fragment">
+						<a href="https://github.com/dotnet/corefx/issues/1624">HttpHandler and HttpClient architecture discussion</a>
+					</p>
 				</section>
 				<section>
 					<img data-src="images/hberg.jpg">
@@ -387,7 +399,14 @@ Check https://developer.github.com for other possible causes.
 				</pre>
 				</section>
 				<section>
-					<small>http://mehdi.me/a-tale-of-debugging-the-linkedin-api-net-and-http-protocol-violations/</small>
+					<small><a href="http://mehdi.me/a-tale-of-debugging-the-linkedin-api-net-and-http-protocol-violations/">A tale of debugging the linkedin api .net and http protocol violations</a></small>
+				</section>
+				<section>
+					<p><big>HttpClient Source Code</big><p>
+					<ul>
+						<li><a href="https://github.com/dotnet/corefx/tree/master/src/System.Net.Http"> .net Core Framework Repo</a></li>
+						<li><a href="https://referencesource.microsoft.com/#System.Net.Http/System/Net/Http/HttpClient.cs"> .net Framework source</a></li>
+					</ul>
 				</section>
 				<section>
 					 <h3>Presentation Available Online</h3>
@@ -407,6 +426,8 @@ Check https://developer.github.com for other possible causes.
 			// - https://github.com/hakimel/reveal.js#configuration
 			// - https://github.com/hakimel/reveal.js#dependencies
 			Reveal.initialize({
+				progress:false,
+				slideNumber:true,
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
 					{ src: 'plugin/markdown/markdown.js' },
